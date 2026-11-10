@@ -16,7 +16,7 @@ class LindeiDimmerKachel extends IPSModule
         $this->RegisterPropertyString('DayEnd', '20:30');
         $this->RegisterPropertyInteger('DayValue', 75);
         $this->RegisterPropertyInteger('NightValue', 15);
-        $this->RegisterPropertyBoolean('ShowTitle', true);
+        $this->RegisterPropertyBoolean('ShowTitle', false);
 
         // HTML-SDK-Kachel aktivieren
         $this->SetVisualizationType(1);
@@ -103,6 +103,12 @@ class LindeiDimmerKachel extends IPSModule
 
             case 'dim':
                 $pct = max(0, min(100, (int) $Value));
+                // Ist das Licht aus und gibt es eine Schalt-Variable, erst darüber einschalten
+                // (z. B. Küche alles: Melder-Halbautomat startet seinen Nachlauf), dann dimmen.
+                if ($pct > 0 && $hasSwitch && !$this->IsOn()) {
+                    RequestAction($switch, true);
+                    IPS_Sleep(800);
+                }
                 RequestAction($dim, $this->ToRaw($dim, $pct));
                 break;
 
