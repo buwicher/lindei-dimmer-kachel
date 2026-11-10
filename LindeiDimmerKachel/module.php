@@ -86,11 +86,13 @@ class LindeiDimmerKachel extends IPSModule
         switch ($Ident) {
             case 'toggle':
                 if ($this->IsOn()) {
+                    // Aus: Schalt-GA aus (z. B. Melder beenden) UND Dimmwert 0 hinterher,
+                    // damit auch Leuchten ausgehen, die über andere GAs eingeschaltet wurden.
                     if ($hasSwitch) {
                         RequestAction($switch, false);
-                    } else {
-                        RequestAction($dim, $this->ToRaw($dim, 0));
+                        IPS_Sleep(300);
                     }
+                    RequestAction($dim, $this->ToRaw($dim, 0));
                 } else {
                     if ($hasSwitch) {
                         RequestAction($switch, true);
@@ -135,8 +137,9 @@ class LindeiDimmerKachel extends IPSModule
     private function IsOn()
     {
         $switch = $this->ReadPropertyInteger('SwitchVariable');
-        if ($switch > 0 && IPS_VariableExists($switch)) {
-            return (bool) GetValue($switch);
+        // An, wenn Schalt-Status an ODER Dimmwert > 0
+        if ($switch > 0 && IPS_VariableExists($switch) && (bool) GetValue($switch)) {
+            return true;
         }
         $dim = $this->ReadPropertyInteger('DimVariable');
         if ($dim > 0 && IPS_VariableExists($dim)) {
