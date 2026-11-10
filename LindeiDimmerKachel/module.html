@@ -1,0 +1,76 @@
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+    html, body { margin: 0; height: 100%; background: transparent; font-family: Poppins, sans-serif; color: #2b2b2b; overflow: hidden; }
+    #wrap { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; padding: 4px; }
+    #title { font-size: 15px; font-weight: 500; margin: 0 0 2px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #ring { flex: 1; width: 100%; min-height: 0; touch-action: none; cursor: pointer; user-select: none; }
+</style>
+<div id="wrap">
+    <div id="title"></div>
+    <svg id="ring" viewBox="0 0 160 160" preserveAspectRatio="xMidYMid meet"></svg>
+</div>
+<script>
+    var R = 64, C = 80, A0 = 135, SW = 270;
+    var COL_TRACK = '#e2e3fd', COL_ARC = '#9b9df7', COL_KNOB = '#1515f0', COL_OFF = '#d6d6d3';
+    var state = { on: false, pct: 0, name: '', showTitle: true };
+    var drag = false, dragPct = null;
+    var svg = document.getElementById('ring');
+
+    function pt(a) { var r = a * Math.PI / 180; return [C + R * Math.cos(r), C + R * Math.sin(r)]; }
+    function arc(a1, a2) {
+        var p1 = pt(a1), p2 = pt(a2);
+        return 'M' + p1[0] + ' ' + p1[1] + ' A' + R + ' ' + R + ' 0 ' + (a2 - a1 > 180 ? 1 : 0) + ' 1 ' + p2[0] + ' ' + p2[1];
+    }
+
+    function draw() {
+        var t = document.getElementById('title');
+        t.textContent = state.name;
+        t.style.display = state.showTitle ? 'block' : 'none';
+        var on = drag ? true : state.on;
+        var pct = drag && dragPct !== null ? dragPct : (on ? state.pct : 0);
+        var end = A0 + SW * Math.max(pct, 0.5) / 100;
+        var k = pt(A0 + SW * pct / 100);
+        var h = '<path d="' + arc(A0, A0 + SW) + '" fill="none" stroke="' + (on ? COL_TRACK : '#ececea') + '" stroke-width="7" stroke-linecap="round"/>';
+        if (on) h += '<path d="' + arc(A0, end) + '" fill="none" stroke="' + COL_ARC + '" stroke-width="7" stroke-linecap="round"/>';
+        h += '<circle cx="' + k[0] + '" cy="' + k[1] + '" r="8" fill="' + (on ? COL_KNOB : COL_OFF) + '"/>';
+        h += '<text x="' + C + '" y="' + (C + 4) + '" text-anchor="middle" font-family="Poppins" font-size="30" fill="' + (on ? '#2b2b2b' : '#888780') + '">' + (on ? Math.round(pct) + ' %' : 'Aus') + '</text>';
+        h += '<text x="' + C + '" y="' + (C + 24) + '" text-anchor="middle" font-family="Poppins" font-size="10" fill="#888780">' + (on ? 'ausschalten' : 'einschalten') + '</text>';
+        svg.innerHTML = h;
+    }
+
+    function pctFromEvent(e) {
+        var b = svg.getBoundingClientRect();
+        var s = Math.min(b.width, b.height) / 160;
+        var x = (e.clientX - b.left - b.width / 2) / s, y = (e.clientY - b.top - b.height / 2) / s;
+        if (Math.sqrt(x * x + y * y) < 44) return null;
+        var a = Math.atan2(y, x) * 180 / Math.PI;
+        a = (a - A0 + 360) % 360;
+        if (a > SW) a = a > SW + 45 ? 0 : SW;
+        return Math.max(1, Math.round(a / SW * 100));
+    }
+
+    svg.addEventListener('pointerdown', function (e) {
+        var p = pctFromEvent(e);
+        if (p === null) { requestAction('toggle', true); return; }
+        drag = true; dragPct = p; svg.setPointerCapture(e.pointerId); draw();
+    });
+    svg.addEventListener('pointermove', function (e) {
+        if (!drag) return;
+        var p = pctFromEvent(e);
+        if (p !== null) { dragPct = p; draw(); }
+    });
+    function endDrag() {
+        if (!drag) return;
+        drag = false;
+        if (dragPct !== null) { state.on = true; state.pct = dragPct; requestAction('dim', dragPct); }
+        dragPct = null; draw();
+    }
+    svg.addEventListener('pointerup', endDrag);
+    svg.addEventListener('pointercancel', endDrag);
+
+    function handleMessage(data) {
+        var d = typeof data === 'string' ? JSON.parse(data) : data;
+        for (var key in d) state[key] = d[key];
+        if (!drag) draw();
+    }
+</script>

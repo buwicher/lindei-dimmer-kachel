@@ -1,0 +1,14 @@
+{
+    "elements": [
+        { "type": "Label", "caption": "Variablen (Werte-Variablen der KNX-Instanzen auswählen)" },
+        { "type": "SelectVariable", "name": "SwitchVariable", "caption": "Schalten (Bool, optional)", "width": "600px" },
+        { "type": "SelectVariable", "name": "DimVariable", "caption": "Dimmen absolut (Pflicht)", "width": "600px" },
+        { "type": "Label", "caption": "Einschalten ohne Schalt-Variable: Wert nach Uhrzeit" },
+        { "type": "SelectVariable", "name": "DayNightVariable", "caption": "Tag/Nacht-Variable (Bool, true = Tag, optional)", "width": "600px" },
+        { "type": "ValidationTextBox", "name": "DayStart", "caption": "Tag ab (falls keine Tag/Nacht-Variable)" },
+        { "type": "ValidationTextBox", "name": "DayEnd", "caption": "Tag bis" },
+        { "type": "NumberSpinner", "name": "DayValue", "caption": "Einschaltwert Tag", "suffix": "%", "minimum": 1, "maximum": 100 },
+        { "type": "NumberSpinner", "name": "NightValue", "caption": "Einschaltwert Nacht", "suffix": "%", "minimum": 1, "maximum": 100 },
+        { "type": "CheckBox", "name": "ShowTitle", "caption": "Namen in der Kachel anzeigen" }
+    ]
+}

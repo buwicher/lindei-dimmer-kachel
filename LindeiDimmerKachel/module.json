@@ -1,0 +1,11 @@
+{
+    "id": "{AD562527-566A-453B-834A-3DBD611417FA}",
+    "name": "Lindei Dimmer-Kachel",
+    "type": 3,
+    "vendor": "Lindei35",
+    "aliases": ["Dimmer-Kachel (rund)"],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "LDK"
+}
