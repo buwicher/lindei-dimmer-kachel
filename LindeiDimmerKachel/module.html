@@ -3,6 +3,8 @@
     html, body { margin: 0; height: 100%; background: transparent; font-family: Poppins, sans-serif; color: #2b2b2b; overflow: hidden; }
     #wrap { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; padding: 4px; }
     #title { font-size: 15px; font-weight: 500; margin: 0 0 2px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    html { transition: background 0.3s; }
+    html.on { background: radial-gradient(circle at 50% 55%, #ffeb3b 0%, #fff176 45%, #fff9c4 100%); }
     #ring { flex: 1; width: 100%; min-height: 0; touch-action: none; cursor: pointer; user-select: none; }
 </style>
 <div id="wrap">
@@ -27,6 +29,7 @@
         t.textContent = state.name;
         t.style.display = state.showTitle ? 'block' : 'none';
         var on = drag ? true : state.on;
+        document.documentElement.classList.toggle('on', on);
         var pct = drag && dragPct !== null ? dragPct : (on ? state.pct : 0);
         var end = A0 + SW * Math.max(pct, 0.5) / 100;
         var k = pt(A0 + SW * pct / 100);
