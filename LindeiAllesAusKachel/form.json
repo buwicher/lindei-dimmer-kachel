@@ -1,0 +1,11 @@
+{
+    "elements": [
+        { "type": "Label", "caption": "Variablen (Werte-Variablen der KNX-Instanzen auswählen)" },
+        { "type": "SelectVariable", "name": "StatusVariable", "caption": "Status (Bool, true = noch Licht an), z. B. 3/1/99", "width": "600px" },
+        { "type": "SelectVariable", "name": "SwitchVariable", "caption": "Zentral aus (Bool, wird auf false gesetzt), z. B. 0/1/2", "width": "600px" },
+        { "type": "NumberSpinner", "name": "HoldTime", "caption": "Haltedauer zum Ausschalten", "suffix": "ms", "minimum": 300, "maximum": 5000 },
+        { "type": "ValidationTextBox", "name": "TextOn", "caption": "Text bei Licht an" },
+        { "type": "ValidationTextBox", "name": "TextOff", "caption": "Text bei alles aus" },
+        { "type": "CheckBox", "name": "ShowTitle", "caption": "Namen in der Kachel anzeigen" }
+    ]
+}

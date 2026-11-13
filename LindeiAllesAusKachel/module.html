@@ -1,0 +1,86 @@
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+<style>
+    html, body { margin: 0; height: 100%; background: transparent; font-family: Poppins, sans-serif; color: #2b2b2b; overflow: hidden; }
+    #wrap { display: flex; flex-direction: column; height: 100%; box-sizing: border-box; padding: 4px; }
+    #title { font-size: 15px; font-weight: 500; margin: 0 0 2px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #btn { flex: 1; width: 100%; min-height: 0; touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; }
+    @keyframes glow { 0%, 100% { opacity: 0.35; } 50% { opacity: 0.7; } }
+    .glow { animation: glow 2.4s ease-in-out infinite; }
+</style>
+<div id="wrap">
+    <div id="title"></div>
+    <svg id="btn" viewBox="0 0 160 160" preserveAspectRatio="xMidYMid meet"></svg>
+</div>
+<script>
+    var C = 80, RB = 54, RH = 66;
+    var COL_ON = '#e67e22', COL_ON2 = '#f5a35a', COL_OFF = '#f1efe8', COL_GREY = '#888780', COL_HOLD = '#1515f0';
+    var state = { on: false, name: '', showTitle: false, hold: 1000, textOn: 'Licht an', textOff: 'alles aus' };
+    var holding = false, t0 = 0, raf = 0, sent = false, sentTimer = 0, prog = 0;
+    var svg = document.getElementById('btn');
+
+    function bulb(col) {
+        return '<circle cx="80" cy="64" r="15" fill="none" stroke="' + col + '" stroke-width="3.5"/>'
+             + '<path d="M73 77 L73 84 L87 84 L87 77" fill="none" stroke="' + col + '" stroke-width="3.5" stroke-linejoin="round"/>'
+             + '<line x1="75" y1="90" x2="85" y2="90" stroke="' + col + '" stroke-width="3.5" stroke-linecap="round"/>';
+    }
+
+    function ring(p) {
+        if (p <= 0) return '';
+        var a = Math.min(p, 0.999) * 2 * Math.PI, x = C + RH * Math.sin(a), y = C - RH * Math.cos(a);
+        return '<path d="M' + C + ' ' + (C - RH) + ' A' + RH + ' ' + RH + ' 0 ' + (a > Math.PI ? 1 : 0) + ' 1 ' + x + ' ' + y
+             + '" fill="none" stroke="' + COL_HOLD + '" stroke-width="6" stroke-linecap="round"/>';
+    }
+
+    function draw() {
+        var t = document.getElementById('title');
+        t.textContent = state.name;
+        t.style.display = state.showTitle ? 'block' : 'none';
+        var on = state.on, h = '';
+        h += '<defs><radialGradient id="g" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="' + COL_ON2 + '"/><stop offset="100%" stop-color="' + COL_ON + '"/></radialGradient></defs>';
+        h += '<circle cx="' + C + '" cy="' + C + '" r="' + RH + '" fill="none" stroke="#ececea" stroke-width="6"/>';
+        if (on) h += '<circle class="glow" cx="' + C + '" cy="' + C + '" r="' + (RB + 9) + '" fill="' + COL_ON + '"/>';
+        h += '<circle cx="' + C + '" cy="' + C + '" r="' + RB + '" fill="' + (on ? 'url(#g)' : COL_OFF) + '" stroke="' + (on ? 'none' : '#d6d6d3') + '" stroke-width="1.5"/>';
+        h += bulb(on ? '#ffffff' : COL_GREY);
+        var txt = sent ? 'schalte aus …' : (on ? state.textOn : state.textOff);
+        h += '<text x="' + C + '" y="110" text-anchor="middle" font-family="Poppins" font-size="12" font-weight="500" fill="' + (on ? '#ffffff' : COL_GREY) + '">' + txt + '</text>';
+        if (on && !sent) h += '<text x="' + C + '" y="123" text-anchor="middle" font-family="Poppins" font-size="8" fill="#ffffff">halten = aus</text>';
+        h += ring(prog);
+        svg.innerHTML = h;
+    }
+
+    function tick() {
+        if (!holding) return;
+        prog = (Date.now() - t0) / Math.max(300, state.hold);
+        if (prog >= 1) {
+            holding = false; prog = 0; sent = true;
+            requestAction('allOff', true);
+            clearTimeout(sentTimer);
+            sentTimer = setTimeout(function () { sent = false; draw(); }, 5000);
+            draw();
+            return;
+        }
+        draw();
+        raf = requestAnimationFrame(tick);
+    }
+
+    svg.addEventListener('pointerdown', function (e) {
+        if (sent) return;
+        holding = true; t0 = Date.now(); prog = 0;
+        svg.setPointerCapture(e.pointerId);
+        raf = requestAnimationFrame(tick);
+    });
+    function cancel() {
+        if (!holding) return;
+        holding = false; prog = 0; cancelAnimationFrame(raf); draw();
+    }
+    svg.addEventListener('pointerup', cancel);
+    svg.addEventListener('pointercancel', cancel);
+    svg.addEventListener('contextmenu', function (e) { e.preventDefault(); });
+
+    function handleMessage(data) {
+        var d = typeof data === 'string' ? JSON.parse(data) : data;
+        for (var key in d) state[key] = d[key];
+        if (!state.on && sent) { sent = false; clearTimeout(sentTimer); }
+        if (!holding) draw();
+    }
+</script>

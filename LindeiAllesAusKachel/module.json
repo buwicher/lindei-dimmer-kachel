@@ -1,0 +1,11 @@
+{
+    "id": "{46A16A40-C909-49E9-AF0E-4F80254BC177}",
+    "name": "LindeiAllesAusKachel",
+    "type": 3,
+    "vendor": "Lindei35",
+    "aliases": ["Lindei Alles-aus-Kachel", "Alles aus (rund)"],
+    "parentRequirements": [],
+    "childRequirements": [],
+    "implemented": [],
+    "prefix": "LAK"
+}
